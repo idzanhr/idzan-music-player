@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { PLATFORM_LABEL, parseLink, pickBest, type ParsedLink } from "@/lib/music";
+import { PLATFORM_LABEL, channelEmbed, parseLink, pickBest, type ParsedLink } from "@/lib/music";
+import { resolveYoutubeHandle } from "@/lib/youtube.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,7 +34,8 @@ function Index() {
     localStorage.setItem("one-player", JSON.stringify({ title, artist, input }));
   }, [title, artist, input]);
 
-  const links = useMemo(() => {
+  const [channels, setChannels] = useState<Record<string, string>>({});
+  const parsed = useMemo(() => {
     const seen = new Set<string>();
     return input.split(/\s+/).map(parseLink).filter((l): l is ParsedLink => {
       if (!l || seen.has(l.platform)) return false;
@@ -41,6 +43,19 @@ function Index() {
       return true;
     });
   }, [input]);
+  useEffect(() => {
+    for (const l of parsed) {
+      if (l.handle && !(l.handle in channels)) {
+        setChannels((c) => ({ ...c, [l.handle!]: "" }));
+        resolveYoutubeHandle({ data: { handle: l.handle } })
+          .then((r) => r.channelId && setChannels((c) => ({ ...c, [l.handle!]: channelEmbed(r.channelId!) })))
+          .catch(() => {});
+      }
+    }
+  }, [parsed, channels]);
+  const links = parsed
+    .map((l) => (l.handle ? { ...l, embed: channels[l.handle] ?? "" } : l))
+    .filter((l) => l.embed);
   const best = pickBest(links);
   const current = links.find((l) => l.platform === active) ?? best;
 
