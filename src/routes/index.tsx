@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { PLATFORM_LABEL, channelEmbed, parseLink, pickBest, type ParsedLink } from "@/lib/music";
+import { PLATFORM_LABEL, parseLink, pickBest, type ParsedLink } from "@/lib/music";
 import { resolveYoutubeHandle } from "@/lib/youtube.functions";
 import { resolveDeezerShortLink } from "@/lib/deezer.functions";
 
@@ -50,7 +50,7 @@ function Index() {
       if (l.handle && !(l.handle in channels)) {
         setChannels((c) => ({ ...c, [l.handle!]: "" }));
         resolveYoutubeHandle({ data: { handle: l.handle } })
-          .then((r) => r.channelId && setChannels((c) => ({ ...c, [l.handle!]: channelEmbed(r.channelId!) })))
+          .then((r) => r.list && setChannels((c) => ({ ...c, [l.handle!]: `https://www.youtube.com/embed/videoseries?list=${r.list}` })))
           .catch(() => {});
       }
       if (l.short && !(l.url in shortLinks)) {
