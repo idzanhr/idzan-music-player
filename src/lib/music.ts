@@ -1,8 +1,9 @@
-export type Platform = "youtube" | "soundcloud" | "spotify" | "apple" | "tidal" | "amazon";
+export type Platform = "youtube" | "soundcloud" | "spotify" | "deezer" | "apple" | "tidal" | "amazon";
 
 export const PLATFORM_LABEL: Record<Platform, string> = {
   youtube: "YouTube Music",
   spotify: "Spotify",
+  deezer: "Deezer",
   apple: "Apple Music",
   tidal: "Tidal",
   soundcloud: "SoundCloud",
@@ -10,7 +11,7 @@ export const PLATFORM_LABEL: Record<Platform, string> = {
 };
 
 // Ranked by how much of the song plays in an embedded player without sign-in.
-export const PLATFORM_RANK: Platform[] = ["youtube", "soundcloud", "spotify", "apple", "tidal", "amazon"];
+export const PLATFORM_RANK: Platform[] = ["youtube", "soundcloud", "spotify", "deezer", "apple", "tidal", "amazon"];
 
 export interface ParsedLink {
   platform: Platform;
@@ -18,6 +19,8 @@ export interface ParsedLink {
   embed: string;
   /** YouTube @handle that must be resolved to a channel before it can play. */
   handle?: string;
+  /** link.deezer.com short link that must be resolved to a deezer.com URL before it can play. */
+  short?: boolean;
   /** Service has no player for this link; show an "Open" button instead. */
   openOnly?: boolean;
 }
@@ -56,6 +59,15 @@ export function parseLink(raw: string): ParsedLink | null {
     const m = u.pathname.match(/\/(track|album|playlist)\/([\w-]+)/);
     if (m) return { platform: "tidal", url: raw, embed: `https://embed.tidal.com/${m[1]}s/${m[2]}` };
     if (/\/artist\//.test(u.pathname)) return { platform: "tidal", url: raw, embed: "", openOnly: true };
+  }
+  if (host === "deezer.com" || host.endsWith(".deezer.com")) {
+    if (host === "link.deezer.com" && u.pathname.length > 1) return { platform: "deezer", url: raw, embed: "", short: true };
+    // Deezer URLs may or may not start with a country code: /hr/track/1 vs /track/1.
+    const m = u.pathname.match(/\/(?:[a-z]{2}\/)?(track|album|playlist|artist|episode|podcast)\/(\d+)/);
+    if (m) {
+      const tail = m[1] === "artist" ? "/top_tracks" : "";
+      return { platform: "deezer", url: raw, embed: `https://widget.deezer.com/widget/dark/${m[1]}/${m[2]}${tail}` };
+    }
   }
   if (host === "soundcloud.com" || host === "m.soundcloud.com" || host === "on.soundcloud.com") {
     if (u.pathname.length > 1)

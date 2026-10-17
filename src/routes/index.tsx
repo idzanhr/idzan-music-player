@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PLATFORM_LABEL, channelEmbed, parseLink, pickBest, type ParsedLink } from "@/lib/music";
 import { resolveYoutubeHandle } from "@/lib/youtube.functions";
+import { resolveDeezerShortLink } from "@/lib/deezer.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "One — every music link, one player" },
-      { name: "description", content: "Paste Spotify, Apple Music, YouTube Music and Tidal links. Play the best option in one player." },
+      { name: "description", content: "Paste Spotify, Apple Music, YouTube Music, Deezer, SoundCloud, Tidal and Amazon Music links. Play the best option in one player." },
       { property: "og:title", content: "One — every music link, one player" },
       { property: "og:description", content: "One minimal player for all your music links." },
       { property: "og:type", content: "website" },
@@ -43,6 +44,7 @@ function Index() {
       return true;
     });
   }, [input]);
+  const [shortLinks, setShortLinks] = useState<Record<string, ParsedLink | null>>({});
   useEffect(() => {
     for (const l of parsed) {
       if (l.handle && !(l.handle in channels)) {
@@ -51,11 +53,19 @@ function Index() {
           .then((r) => r.channelId && setChannels((c) => ({ ...c, [l.handle!]: channelEmbed(r.channelId!) })))
           .catch(() => {});
       }
+      if (l.short && !(l.url in shortLinks)) {
+        setShortLinks((s) => ({ ...s, [l.url]: null }));
+        resolveDeezerShortLink({ data: { url: l.url } })
+          .then((r) => setShortLinks((s) => ({ ...s, [l.url]: r.url ? parseLink(r.url) : null })))
+          .catch(() => {});
+      }
     }
-  }, [parsed, channels]);
+  }, [parsed, channels, shortLinks]);
   const links = parsed
-    .map((l) => (l.handle ? { ...l, embed: channels[l.handle] ?? "" } : l))
-    .filter((l) => l.embed || l.openOnly);
+    .map((l) =>
+      l.handle ? { ...l, embed: channels[l.handle] ?? "" } : l.short ? shortLinks[l.url] ?? null : l,
+    )
+    .filter((l): l is ParsedLink => !!l && (l.embed !== "" || !!l.openOnly));
   const best = pickBest(links);
   const current = links.find((l) => l.platform === active) ?? best;
 
@@ -71,7 +81,7 @@ function Index() {
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Paste links — YouTube Music, SoundCloud, Spotify, Apple Music, Tidal, Amazon Music"
+        placeholder="Paste links — YouTube Music, SoundCloud, Spotify, Apple Music, Deezer, Tidal, Amazon Music"
         rows={3}
         className="mt-8 w-full resize-none rounded-lg border border-border bg-card p-4 text-sm outline-none focus:border-primary"
       />
