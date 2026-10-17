@@ -42,3 +42,8 @@ export function parseLink(raw: string): ParsedLink | null {
   return null;
 }
 
+export function pickBest(links: ParsedLink[]): ParsedLink | null {
+  return [...links].sort((a, b) => PLATFORM_RANK.indexOf(a.platform) - PLATFORM_RANK.indexOf(b.platform))[0] ?? null;
+}
+
+
