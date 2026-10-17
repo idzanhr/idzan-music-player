@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { PLATFORM_LABEL, channelEmbed, parseLink, pickBest, type ParsedLink } from "@/lib/music";
+import { PLATFORM_LABEL, parseLink, pickBest, type ParsedLink } from "@/lib/music";
 import { resolveYoutubeHandle } from "@/lib/youtube.functions";
 import { resolveDeezerShortLink } from "@/lib/deezer.functions";
 
