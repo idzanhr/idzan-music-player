@@ -46,16 +46,4 @@ export function pickBest(links: ParsedLink[]): ParsedLink | null {
   return [...links].sort((a, b) => PLATFORM_RANK.indexOf(a.platform) - PLATFORM_RANK.indexOf(b.platform))[0] ?? null;
 }
 
-export async function fetchLyrics(artist: string, title: string): Promise<string | null> {
-  if (!artist || !title) return null;
-  try {
-    const r = await fetch(
-      `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`,
-    );
-    if (!r.ok) return null;
-    const d = await r.json();
-    return d.plainLyrics || null;
-  } catch {
-    return null;
-  }
-}
+
