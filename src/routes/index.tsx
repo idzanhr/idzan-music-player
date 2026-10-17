@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { PLATFORM_LABEL, fetchLyrics, parseLink, pickBest, type ParsedLink } from "@/lib/music";
+import { PLATFORM_LABEL, parseLink, pickBest, type ParsedLink } from "@/lib/music";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "One — every music link, one player" },
-      { name: "description", content: "Paste Spotify, Apple Music, YouTube Music and Tidal links. Play the best option with lyrics." },
+      { name: "description", content: "Paste Spotify, Apple Music, YouTube Music and Tidal links. Play the best option in one player." },
       { property: "og:title", content: "One — every music link, one player" },
-      { property: "og:description", content: "One minimal player for all your music links, with lyrics." },
+      { property: "og:description", content: "One minimal player for all your music links." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -21,8 +21,6 @@ function Index() {
   const [artist, setArtist] = useState("");
   const [input, setInput] = useState("");
   const [active, setActive] = useState<string | null>(null);
-  const [lyrics, setLyrics] = useState<string | null>(null);
-  const [loadingLyrics, setLoadingLyrics] = useState(false);
 
   useEffect(() => {
     const s = localStorage.getItem("one-player");
@@ -45,15 +43,6 @@ function Index() {
   }, [input]);
   const best = pickBest(links);
   const current = links.find((l) => l.platform === active) ?? best;
-
-  useEffect(() => {
-    const t = setTimeout(async () => {
-      setLoadingLyrics(true);
-      setLyrics(await fetchLyrics(artist.trim(), title.trim()));
-      setLoadingLyrics(false);
-    }, 600);
-    return () => clearTimeout(t);
-  }, [artist, title]);
 
   return (
     <main className="mx-auto min-h-screen max-w-2xl px-6 py-16">
@@ -98,14 +87,6 @@ function Index() {
           <p className="mt-2 text-xs text-muted-foreground">★ Best option — plays the most without sign-in.</p>
         </section>
       )}
-
-      <section className="mt-12">
-        <h2 className="text-xs tracking-[0.3em] text-muted-foreground uppercase">Lyrics</h2>
-        <div className="mt-4 whitespace-pre-line text-lg leading-relaxed text-foreground/90">
-          {loadingLyrics ? <span className="text-muted-foreground">Searching…</span>
-            : lyrics ?? <span className="text-muted-foreground">{title && artist ? "No lyrics found." : "Enter title and artist to load lyrics."}</span>}
-        </div>
-      </section>
     </main>
   );
 }
