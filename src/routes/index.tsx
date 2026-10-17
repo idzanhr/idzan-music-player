@@ -65,7 +65,7 @@ function Index() {
     .map((l) =>
       l.handle ? { ...l, embed: channels[l.handle] ?? "" } : l.short ? shortLinks[l.url] ?? null : l,
     )
-    .filter((l): l is ParsedLink => !!l && (l.embed !== "" || l.openOnly));
+    .filter((l): l is ParsedLink => !!l && (l.embed !== "" || !!l.openOnly));
   const best = pickBest(links);
   const current = links.find((l) => l.platform === active) ?? best;
 
