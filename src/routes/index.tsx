@@ -7,10 +7,10 @@ import { resolveDeezerShortLink } from "@/lib/deezer.functions";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "One — every music link, one player" },
+      { title: "Ultimate Music Player — every music link, one player" },
       { name: "description", content: "Paste Spotify, Apple Music, YouTube Music, Deezer, SoundCloud, Tidal and Amazon Music links. Play the best option in one player." },
-      { property: "og:title", content: "One — every music link, one player" },
-      { property: "og:description", content: "One minimal player for all your music links." },
+      { property: "og:title", content: "Ultimate Music Player — every music link, one player" },
+      { property: "og:description", content: "Minimal dark player for all your music links." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
