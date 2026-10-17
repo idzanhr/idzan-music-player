@@ -44,9 +44,9 @@ export function parseLink(raw: string): ParsedLink | null {
     const list = u.searchParams.get("list");
     if (list) return { platform: "youtube", url: raw, embed: `https://www.youtube.com/embed/videoseries?list=${list}` };
     const ch = u.pathname.match(/^\/channel\/(UC[\w-]{22})/);
-    if (ch) return { platform: "youtube", url: raw, embed: channelEmbed(ch[1]) };
+    if (ch) return { platform: "youtube", url: raw, embed: channelEmbed(ch[1]!) };
     const h = u.pathname.match(/^\/(@[\w.\-%]+)/);
-    if (h) return { platform: "youtube", url: raw, embed: "", handle: decodeURIComponent(h[1]) };
+    if (h) return { platform: "youtube", url: raw, embed: "", handle: decodeURIComponent(h[1]!) };
   }
   if (host === "tidal.com" || host === "listen.tidal.com") {
     const m = u.pathname.match(/\/(track|album|playlist)\/([\w-]+)/);
