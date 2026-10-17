@@ -50,7 +50,7 @@ function Index() {
       if (l.handle && !(l.handle in channels)) {
         setChannels((c) => ({ ...c, [l.handle!]: "" }));
         resolveYoutubeHandle({ data: { handle: l.handle } })
-          .then((r) => r.channelId && setChannels((c) => ({ ...c, [l.handle!]: channelEmbed(r.channelId!) })))
+          .then((r) => r.list && setChannels((c) => ({ ...c, [l.handle!]: `https://www.youtube.com/embed/videoseries?list=${r.list}` })))
           .catch(() => {});
       }
       if (l.short && !(l.url in shortLinks)) {
