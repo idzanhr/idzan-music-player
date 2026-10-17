@@ -55,7 +55,7 @@ function Index() {
   }, [parsed, channels]);
   const links = parsed
     .map((l) => (l.handle ? { ...l, embed: channels[l.handle] ?? "" } : l))
-    .filter((l) => l.embed);
+    .filter((l) => l.embed || l.openOnly);
   const best = pickBest(links);
   const current = links.find((l) => l.platform === active) ?? best;
 
@@ -71,7 +71,7 @@ function Index() {
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Paste links — Spotify, Apple Music, YouTube Music, Tidal"
+        placeholder="Paste links — YouTube Music, SoundCloud, Spotify, Apple Music, Tidal, Amazon Music"
         rows={3}
         className="mt-8 w-full resize-none rounded-lg border border-border bg-card p-4 text-sm outline-none focus:border-primary"
       />
@@ -91,13 +91,22 @@ function Index() {
             ))}
           </div>
           <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card">
+            {current.openOnly ? (
+              <div className="flex h-[175px] flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+                <p>{PLATFORM_LABEL[current.platform]} can't play here.</p>
+                <a href={current.url} target="_blank" rel="noreferrer" className="chip chip-active">
+                  Open in {PLATFORM_LABEL[current.platform]} ↗
+                </a>
+              </div>
+            ) : (
             <iframe
               key={current.embed}
               src={current.embed}
-              className={`w-full ${current.platform === "youtube" ? "aspect-video" : "h-[175px]"}`}
+              className={`w-full ${current.platform === "youtube" ? "aspect-video" : current.platform === "soundcloud" ? "h-[300px]" : "h-[175px]"}`}
               allow="autoplay; encrypted-media; clipboard-write; fullscreen; picture-in-picture"
               title={PLATFORM_LABEL[current.platform]}
             />
+            )}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">★ Best option — plays the most without sign-in.</p>
         </section>
